@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Bar Model Exploder! 💥</title>
+    <style>
+        :root {
+            --primary-color: #ffcc00;
+            --secondary-color: #ff6600;
+            --bg-color: #f0f8ff;
+            --bar-top: #4CAF50;
+            --bar-bottom-1: #2196F3;
+            --bar-bottom-2: #9C27B0;
+            --font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        h1 {
+            color: var(--secondary-color);
+            text-shadow: 2px 2px #fff;
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        /* Mode Toggle */
+        .mode-toggle {
+            background: #eee;
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+        }
+
+        /* Bar Model Styling */
+        .bar-model {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .bar {
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            color: white;
+            font-weight: bold;
+            min-height: 90px;
+            transition: all 0.5s ease;
+        }
+
+        #top-bar {
+            width: 100%;
+            background-color: var(--bar-top);
+            border: 4px dashed #fff;
+        }
+
+        #top-bar input {
+            width: 150px;
+            font-size: 2.2rem;
+            font-family: var(--font-family);
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-align: center;
+            border-bottom: 3px solid white;
+            outline: none;
+            border-radius: 5px;
+        }
+
+        #top-bar input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .bottom-bars {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .bottom-bar {
+            flex: 1;
+            min-height: 90px;
+        }
+
+        #bar-1 { background-color: var(--bar-bottom-1); }
+        #bar-2 { background-color: var(--bar-bottom-2); }
+
+        /* Explosion Area */
+        #explosion-zone {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+            min-height: 200px;
+        }
+
+        .chunk {
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.4rem;
+            color: white;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .hundreds { background-color: #e91e63; }
+        .tens { background-color: #ff9800; }
+        .ones { background-color: #00bcd4; }
+
+        .exchange-note {
+            font-size: 0.9rem;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            padding: 2px 8px;
+            border-radius: 5px;
+            margin-top: 5px;
+            border: 1px solid #333;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Buttons */
+        .controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.5rem;
+            font-family: var(--font-family);
+            cursor: pointer;
+            border: none;
+            border-radius: 50px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 5px 0 #999;
+        }
+
+        button:hover { transform: scale(1.05); }
+
+        button:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #999;
+        }
+
+        #explode-btn { background-color: var(--primary-color); color: #000; }
+        #print-btn { background-color: #eee; color: #333; font-size: 1rem; }
+        #reset-btn { background-color: #4facfe; color: white; }
+
+        /* Step Instructions */
+        #instruction {
+            font-size: 1.6rem;
+            margin: 15px 0;
+            color: #444;
+            min-height: 2.5em;
+            font-weight: bold;
+        }
+
+        /* Print Styling */
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; width: 100%; border: none; }
+            .controls, .mode-toggle, #reset-btn { display: none !important; }
+            h1 { font-size: 2rem; }
+            #instruction { display: none; }
+            .bar-model { border: 2px solid #000; padding: 20px; border-radius: 0; }
+            #top-bar { color: black; border: 2px solid black; background: white !important; }
+            .bottom-bar { color: black; border: 2px solid black; background: white !important; }
+            #workings-report { display: block !important; }
+            .chunk { color: black; border: 1px solid #ccc; background: white !important; }
+            .exchange-note { border: 1px solid #000; }
+        }
+
+        #workings-report {
+            display: none;
+            text-align: left;
+            margin-top: 30px;
+            padding: 20px;
+            border: 2px solid #333;
+        }
+
+        .hidden { display: none; }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px; width: 26px;
+            left: 4px; bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider { background-color: var(--bar-bottom-2); }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        /* Rocket Animation */
+        .rocket {
+            position: fixed;
+            bottom: -100px;
+            font-size: 5rem;
+            z-index: 2000;
+            pointer-events: none;
+            filter: drop-shadow(0 0 10px rgba(255,102,0,0.5));
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translate(0, 0) rotate(-45deg); }
+            10%, 30%, 50%, 70%, 90% { transform: translate(-10px, 0) rotate(-45deg); }
+            20%, 40%, 60%, 80% { transform: translate(10px, 0) rotate(-45deg); }
+        }
+
+        .kaboom {
+            position: fixed;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 8rem;
+            z-index: 2001;
+            animation: popIn 0.3s forwards;
+        }
+
+        /* Moon and Stars */
+        .moon {
+            position: fixed;
+            top: 50px;
+            right: 50px;
+            width: 120px;
+            height: 120px;
+            background: #fdfae1;
+            border-radius: 50%;
+            box-shadow: 0 0 60px #fff, inset -15px -15px 30px rgba(0,0,0,0.1);
+            z-index: 1999;
+            animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .moon::after {
+            content: "🌑";
+            opacity: 0.1;
+            font-size: 5rem;
+        }
+
+        .star {
+            position: fixed;
+            background: white;
+            border-radius: 50%;
+            z-index: 1998;
+            pointer-events: none;
+            animation: twinkle var(--duration) infinite alternate;
+        }
+
+        @keyframes twinkle { 
+            from { opacity: 0.2; transform: scale(0.5); } 
+            to { opacity: 1; transform: scale(1.2); } 
+        }
+
+        @keyframes toMoon {
+            0% { 
+                bottom: -100px; 
+                left: 20vw; 
+                transform: rotate(-15deg) scale(1.5); 
+            }
+            100% { 
+                bottom: calc(100vh - 150px); 
+                left: calc(100vw - 150px); 
+                transform: rotate(20deg) scale(0.1);
+                opacity: 0;
+            }
+        }
+
+        .celebration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 5rem;
+            color: var(--secondary-color);
+            text-shadow: 4px 4px white;
+            z-index: 2005;
+            pointer-events: none;
+            animation: popIn 0.5s forwards, fadeOut 1s 2s forwards;
+        }
+
+        @keyframes fadeOut { to { opacity: 0; } }
+    </style>
+</head>
+<body>
+
+    <h1>Bar Model Exploder! 💥</h1>
+
+    <div class="container">
+        <div class="mode-toggle">
+            <span>Simple Mode</span>
+            <label class="switch">
+                <input type="checkbox" id="exchange-mode">
+                <span class="slider"></span>
+            </label>
+            <span>Exchanging Mode (Year 3+)</span>
+        </div>
+
+        <p id="instruction">Loading...</p>
+
+        <div class="bar-model">
+            <div id="top-bar" class="bar">
+                <input type="number" id="answer-input" placeholder="?">
+            </div>
+            <div class="bottom-bars">
+                <div id="bar-1" class="bottom-bar bar">?</div>
+                <div id="bar-2" class="bottom-bar bar">?</div>
+            </div>
+        </div>
+
+        <div id="explosion-zone" class="hidden"></div>
+
+        <div class="controls">
+            <button id="explode-btn">EXPLODE! 🧨</button>
+            <button id="reset-btn" class="hidden">New Challenge 🔄</button>
+            <button id="print-btn" class="hidden">Print Workings 🖨️</button>
+        </div>
+
+        <div id="workings-report">
+            <h2>My Math Workings 📝</h2>
+            <div id="report-content"></div>
+        </div>
+    </div>
+
+    <script>
+        const explodeBtn = document.getElementById('explode-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const printBtn = document.getElementById('print-btn');
+        const topBar = document.getElementById('top-bar');
+        const bar1 = document.getElementById('bar-1');
+        const bar2 = document.getElementById('bar-2');
+        const instruction = document.getElementById('instruction');
+        const explosionZone = document.getElementById('explosion-zone');
+        const exchangeMode = document.getElementById('exchange-mode');
+        const reportContent = document.getElementById('report-content');
+
+        let v1, v2;
+        let p1 = {}, p2 = {};
+        let currentProblemId = 0;
+
+        function partition(num) {
+            return {
+                h: Math.floor(num / 100) * 100,
+                t: Math.floor((num % 100) / 10) * 10,
+                o: num % 10
+            };
+        }
+
+        function generateProblem() {
+            currentProblemId++;
+            const isExchanging = exchangeMode.checked;
+            let h1, h2, t1, t2, o1, o2;
+
+            if (isExchanging) {
+                const exchangeCol = Math.floor(Math.random() * 2); 
+                h1 = Math.floor(Math.random() * 4) + 1; 
+                h2 = Math.floor(Math.random() * 4) + 1; 
+
+                if (exchangeCol === 0) {
+                    o1 = Math.floor(Math.random() * 5) + 5; 
+                    o2 = Math.floor(Math.random() * 5) + 5; 
+                    t1 = Math.floor(Math.random() * 4); 
+                    t2 = Math.floor(Math.random() * 4);
+                } else {
+                    t1 = Math.floor(Math.random() * 5) + 5; 
+                    t2 = Math.floor(Math.random() * 5) + 5; 
+                    o1 = Math.floor(Math.random() * 4);
+                    o2 = Math.floor(Math.random() * 4);
+                }
+            } else {
+                h1 = Math.floor(Math.random() * 8) + 1;
+                h2 = Math.floor(Math.random() * (9 - h1)) + 1;
+                t1 = Math.floor(Math.random() * 9);
+                t2 = Math.floor(Math.random() * (9 - t1));
+                o1 = Math.floor(Math.random() * 9);
+                o2 = Math.floor(Math.random() * (9 - o1));
+            }
+
+            v1 = h1 * 100 + t1 * 10 + o1;
+            v2 = h2 * 100 + t2 * 10 + o2;
+
+            bar1.innerText = v1;
+            bar2.innerText = v2;
+            topBar.innerHTML = `<input type="number" id="answer-input" placeholder="?">`;
+            topBar.style.transform = "scale(1)";
+            instruction.innerText = isExchanging ? "Exchanging mode ready! 🚀" : "Simple mode ready! 👍";
+            
+            explosionZone.innerHTML = '';
+            explosionZone.classList.add('hidden');
+            explodeBtn.classList.remove('hidden');
+            resetBtn.classList.add('hidden');
+            printBtn.classList.add('hidden');
+        }
+
+        function getStepText(part1, part2, sum, unit) {
+            if (part1 === 0 && part2 === 0) return "0";
+            if (part1 === 0) return `${part2}`;
+            if (part2 === 0) return `${part1}`;
+            return `${part1} + ${part2} = ${sum}`;
+        }
+
+        function launchRocket(isSuccess) {
+            if (isSuccess) {
+                // Setup Space Environment
+                const moon = document.createElement('div');
+                moon.className = 'moon';
+                document.body.appendChild(moon);
+
+                for (let i = 0; i < 40; i++) {
+                    const star = document.createElement('div');
+                    star.className = 'star';
+                    const size = Math.random() * 4 + 2;
+                    star.style.width = size + 'px';
+                    star.style.height = size + 'px';
+                    star.style.left = Math.random() * 100 + 'vw';
+                    star.style.top = Math.random() * 100 + 'vh';
+                    star.style.setProperty('--duration', (Math.random() * 1 + 0.5) + 's');
+                    document.body.appendChild(star);
+                    setTimeout(() => star.remove(), 4000);
+                }
+
+                const rocket = document.createElement('div');
+                rocket.className = 'rocket';
+                rocket.innerText = '🚀';
+                rocket.style.animation = 'toMoon 2.5s ease-in forwards';
+                document.body.appendChild(rocket);
+
+                const cheers = document.createElement('div');
+                cheers.className = 'celebration';
+                cheers.innerText = 'TO THE MOON! 🌙✨';
+                document.body.appendChild(cheers);
+
+                setTimeout(() => {
+                    rocket.remove();
+                    moon.remove();
+                    cheers.remove();
+                }, 3000);
+
+            } else {
+                const rocket = document.createElement('div');
+                rocket.className = 'rocket';
+                rocket.innerText = '🚀';
+                rocket.style.left = '50%';
+                rocket.style.transform = 'translateX(-50%) rotate(-45deg)';
+                rocket.style.bottom = '20px';
+                rocket.style.animation = 'shake 0.5s infinite';
+                document.body.appendChild(rocket);
+                
+                setTimeout(() => {
+                    const kaboom = document.createElement('div');
+                    kaboom.className = 'kaboom';
+                    kaboom.innerText = '💥';
+                    document.body.appendChild(kaboom);
+                    rocket.innerText = '🔥';
+                    
+                    setTimeout(() => {
+                        rocket.remove();
+                        kaboom.remove();
+                    }, 1000);
+                }, 1000);
+            }
+        }
+
+        explodeBtn.addEventListener('click', () => {
+            const input = document.getElementById('answer-input');
+            const userVal = parseInt(input.value);
+            const correctVal = v1 + v2;
+
+            if (isNaN(userVal)) {
+                alert("Type your answer in the top box first!");
+                return;
+            }
+
+            p1 = partition(v1);
+            p2 = partition(v2);
+
+            explodeBtn.classList.add('hidden');
+            resetBtn.classList.remove('hidden');
+            printBtn.classList.remove('hidden');
+            explosionZone.classList.remove('hidden');
+            
+            if (userVal === correctVal) {
+                launchRocket(true);
+                instruction.innerText = "YOU GOT IT! 🌟 Rocket launching!";
+            } else {
+                launchRocket(false);
+                instruction.innerText = "Not quite, but let's see how it's done! 💥";
+            }
+
+            renderExplosion();
+        });
+
+        async function renderExplosion() {
+            const problemId = currentProblemId;
+            explosionZone.innerHTML = '';
+            
+            const hSum = p1.h + p2.h;
+            const tSum = p1.t + p2.t;
+            const oSum = p1.o + p2.o;
+
+            instruction.innerText = "Kaboom! 💥 Let's look at the parts...";
+
+            // Row 1: Partitioned P1
+            addChunk(p1.h, 'hundreds');
+            addChunk(p1.t, 'tens');
+            addChunk(p1.o, 'ones');
+            
+            // Row 2: Partitioned P2
+            addChunk(p2.h, 'hundreds');
+            addChunk(p2.t, 'tens');
+            addChunk(p2.o, 'ones');
+
+            await sleep(2000);
+            if (problemId !== currentProblemId) return;
+            instruction.innerText = "Adding the columns... 🧮";
+
+            // Row 3: Initial Addition
+            const hBox = addChunk(getStepText(p1.h, p2.h, hSum), 'hundreds');
+            const tBox = addChunk(getStepText(p1.t, p2.t, tSum), 'tens');
+            const oBox = addChunk(getStepText(p1.o, p2.o, oSum), 'ones');
+
+            await sleep(2000);
+            if (problemId !== currentProblemId) return;
+
+            let finalH = hSum, finalT = tSum, finalO = oSum;
+            let exchanges = [];
+
+            // Exchanging logic visualization
+            if (oSum >= 10) {
+                const ex = 10;
+                finalO -= ex;
+                finalT += ex;
+                oBox.innerHTML += `<div class="exchange-note">Exchange 10 for 1 Ten! ➡️</div>`;
+                exchanges.push(`Exchanged 10 ones for 1 ten.`);
+                await sleep(1500);
+                if (problemId !== currentProblemId) return;
+            }
+
+            if (tSum >= 100) {
+                const ex = 100;
+                finalT -= ex;
+                finalH += ex;
+                tBox.innerHTML += `<div class="exchange-note">Exchange 100 for 1 Hundred! ➡️</div>`;
+                exchanges.push(`Exchanged 10 tens for 1 hundred.`);
+                await sleep(1500);
+                if (problemId !== currentProblemId) return;
+            }
+
+            const total = v1 + v2;
+            topBar.innerText = total;
+            topBar.style.transform = "scale(1.1)";
+            
+            generateReport(v1, v2, total, hSum, tSum, oSum, finalH, finalT, finalO, exchanges);
+        }
+
+        function addChunk(text, className) {
+            const div = document.createElement('div');
+            div.className = `chunk ${className}`;
+            div.innerHTML = `<span>${text}</span>`;
+            explosionZone.appendChild(div);
+            return div;
+        }
+
+        function generateReport(v1, v2, total, hS, tS, oS, fh, ft, fo, exchanges) {
+            let exchangeText = exchanges.length > 0 
+                ? `<p><strong>Step 3: Exchanging</strong></p><ul>${exchanges.map(e => `<li>${e}</li>`).join('')}</ul><hr>`
+                : "";
+
+            reportContent.innerHTML = `
+                <p><strong>Numbers:</strong> ${v1} and ${v2}</p>
+                <hr>
+                <p><strong>Step 1: Partitioning</strong></p>
+                <p>${v1} = ${p1.h} + ${p1.t} + ${p1.o}</p>
+                <p>${v2} = ${p2.h} + ${p2.t} + ${p2.o}</p>
+                <hr>
+                <p><strong>Step 2: Combining Parts</strong></p>
+                <p>Hundreds: ${getStepText(p1.h, p2.h, hS)}</p>
+                <p>Tens: ${getStepText(p1.t, p2.t, tS)}</p>
+                <p>Ones: ${getStepText(p1.o, p2.o, oS)}</p>
+                <hr>
+                ${exchangeText}
+                <p><strong>Final Total</strong></p>
+                <p>${fh} + ${ft} + ${fo} = <strong>${total}</strong></p>
+            `;
+        }
+
+        function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+        resetBtn.addEventListener('click', () => {
+            generateProblem();
+        });
+
+        printBtn.addEventListener('click', () => {
+            window.print();
+        });
+
+        exchangeMode.addEventListener('change', () => {
+            generateProblem();
+        });
+
+        // Initialize
+        generateProblem();
+    </script>
+</body>
+</html>
